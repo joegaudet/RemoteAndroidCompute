@@ -1,0 +1,3 @@
+grant codeBase "file:/Users/joe/Documents/Software/Android/DynamicProxytest/src/" {
+    permission java.security.AllPermission;
+};
