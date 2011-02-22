@@ -51,7 +51,6 @@ public class RemoteObjectSerializer {
 		lengthBuffer.rewind();
 		int length = lengthBuffer.getInt();
 
-		System.out.println("Object Lenght: " + length);
 		ByteBuffer objectBuffer = ByteBuffer.allocate(length - 4);
 		channel.read(objectBuffer);
 		objectBuffer.rewind();
@@ -59,9 +58,6 @@ public class RemoteObjectSerializer {
 		byte[] classNameBuffer = new byte[objectBuffer.getInt()];
 		objectBuffer.get(classNameBuffer);
 		String className = new String(classNameBuffer);
-		System.out.println("Loading ClassName: " + className);
-		
-		
 		
 		Class<?> klass = Class.forName(className);
 		Object object = null;
@@ -114,7 +110,7 @@ public class RemoteObjectSerializer {
 				else if (isAssignableFromAny(klass, Double.class, Long.class, double.class, long.class)) {
 					size += 8;
 				}
-				else if (isAssignableFromAny(klass, Byte.class, byte.class)) {
+				else if (isAssignableFromAny(klass, Byte.class, byte.class, Boolean.class, boolean.class)) {
 					size += 1;
 				}
 				else if (isAssignableFromAny(klass, Character.class, char.class)) {
@@ -123,7 +119,7 @@ public class RemoteObjectSerializer {
 				else {
 					
 					// autoboxing array
-					if (isAssignableFromAny(klass, Byte[].class)) {
+					if (isAssignableFromAny(klass, Byte[].class, Boolean[].class)) {
 						size += 4 + ((Object[]) object).length;
 					}
 					else if(isAssignableFromAny(klass, Character[].class)){
@@ -139,6 +135,9 @@ public class RemoteObjectSerializer {
 					// primative arrays
 					else if (isAssignableFromAny(klass, byte[].class)) {
 						size += 4 + ((byte[]) object).length;
+					}
+					else if (isAssignableFromAny(klass, boolean[].class)) {
+						size += 4 + ((boolean[]) object).length;
 					}
 					else if (isAssignableFromAny(klass, char[].class)) {
 						size += 4 + ((char[]) object).length * 2;

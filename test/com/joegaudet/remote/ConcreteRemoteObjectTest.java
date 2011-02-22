@@ -21,15 +21,15 @@ public class ConcreteRemoteObjectTest extends TestCase {
 	}
 
 	public void testComputeSchema() throws Exception {
-		int expectedSize = 58 + 12 * 4 + (4 + TestRemoteObject.class.getName().length());
+		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
 		assertEquals(expectedSize,testRemoteObject.computeSchemaSize());
 		populateArraysObject(expectedSize);
 	}
 	
 	public void testSerializeDeSerializeEquality() throws Exception {
-		int expectedSize = 58 + 12 * 4 + (4 + TestRemoteObject.class.getName().length());
+		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
 		assertEquals(testRemoteObject.computeSchemaSize(),expectedSize);
-//		populateArraysObject(expectedSize);
+		populateArraysObject(expectedSize);
 		
 		FileChannel channel = new FileOutputStream(new File("test.obj")).getChannel();
 		RemoteObjectSerializer.writeFullRemoteObject(testRemoteObject, channel);
@@ -38,7 +38,6 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		channel = new FileInputStream(new File("test.obj")).getChannel();
 		TestRemoteObject readRemoteObject = (TestRemoteObject) RemoteObjectSerializer.readRemoteObject(channel);
 		channel.close();
-		
 		
 		assertTrue(testRemoteObject.equals(readRemoteObject));
 	}
@@ -53,6 +52,17 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		Byte[] byteArray2 = TestHelper.getAnonymousByteObjectArray();
 		testRemoteObject.setByteArray2(byteArray2);
 		expectedSize += byteArray2.length + 8;
+		assertEquals(testRemoteObject.computeSchemaSize(),expectedSize);
+		
+		// booleans
+		boolean[] booleanArray = TestHelper.getAnonymousBooleanArray();
+		testRemoteObject.setBoolArray(booleanArray);
+		expectedSize += booleanArray.length * 1 + 8;
+		assertEquals(testRemoteObject.computeSchemaSize(),expectedSize);
+
+		Boolean[] booleanArray2 = TestHelper.getAnonymousBooleanObjectArray();
+		testRemoteObject.setBoolArray2(booleanArray2);
+		expectedSize += booleanArray2.length * 1 + 8;
 		assertEquals(testRemoteObject.computeSchemaSize(),expectedSize);
 		
 		// char arrays
@@ -109,6 +119,7 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		testRemoteObject.setDoubleArray2(doubleArray2);
 		expectedSize += doubleArray2.length * 8 + 8;
 		assertEquals(testRemoteObject.computeSchemaSize(),expectedSize);
+
 	}
 	
 	public void testEquals() throws Exception {

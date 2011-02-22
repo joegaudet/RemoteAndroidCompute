@@ -11,6 +11,9 @@ public class TestRemoteObject implements RemoteObject {
 	private byte byteField;
 	private Byte byteField2;
 
+	private boolean booleanField;
+	private Boolean booleanField2;
+
 	private int intField;
 	private Integer integerField;
 
@@ -23,6 +26,9 @@ public class TestRemoteObject implements RemoteObject {
 	private double doubleField;
 	private Double doubleField2;
 
+	private boolean[] boolArray;
+	private Boolean[] boolArray2;
+	
 	private byte[] byteArray;
 	private Byte[] byteArray2;
 
@@ -41,16 +47,19 @@ public class TestRemoteObject implements RemoteObject {
 	private double[] doubleArray;
 	private Double[] doubleArray2;
 
-	public TestRemoteObject(){
-		
+	public TestRemoteObject() {
+
 	}
-	
+
 	public TestRemoteObject(Random rand) {
 		charField = (char) rand.nextInt(255);
 		characterField = (char) rand.nextInt(255);
 
 		byteField = (byte) rand.nextInt(255);
 		byteField2 = (byte) rand.nextInt(255);
+
+		booleanField = rand.nextBoolean();
+		booleanField2 = rand.nextBoolean();
 
 		intField = rand.nextInt(255);
 		integerField = rand.nextInt(255);
@@ -64,50 +73,76 @@ public class TestRemoteObject implements RemoteObject {
 		doubleField = rand.nextDouble();
 		doubleField2 = rand.nextDouble();
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		
-		if(!(obj instanceof TestRemoteObject)) return false;
-		
-		TestRemoteObject other = (TestRemoteObject)obj;
+
+		if (!(obj instanceof TestRemoteObject))
+			return false;
+
+		TestRemoteObject other = (TestRemoteObject) obj;
 		boolean retval = true;
 
 		retval &= byteField == other.getByteField();
 		retval &= byteField2.equals(other.getByteField2());
-		
+		check(retval, "Byte Fields");
+
+		retval &= booleanField == other.isBooleanField();
+		retval &= booleanField2.equals(other.getBooleanField2());
+		check(retval, "Boolean Fields");
+
 		retval &= charField == other.getCharField();
 		retval &= characterField.equals(other.getCharacterField());
-		
+		check(retval, "Char Fields");
+
 		retval &= intField == other.getIntField();
 		retval &= integerField.equals(other.getIntegerField());
-		
+		check(retval, "Int Fields");
+
 		retval &= floatField == other.getFloatField();
 		retval &= floatField2.equals(other.getFloatField2());
-		
+		check(retval, "Float Fields");
+
 		retval &= longField == other.getLongField();
 		retval &= longField2.equals(other.getLongField2());
-		
+		check(retval, "Long Fields");
+
 		retval &= Arrays.equals(byteArray, other.getByteArray());
 		retval &= Arrays.equals(byteArray2, other.getByteArray2());
-		
+		check(retval, "ByteArr Fields");
+
 		retval &= Arrays.equals(charArray, other.getCharArray());
 		retval &= Arrays.equals(characterArray, other.getCharacterArray());
-		
+		check(retval, "CharArr Fields");
+
 		retval &= Arrays.equals(intArray, other.getIntArray());
 		retval &= Arrays.equals(integerArray2, other.getIntegerArray2());
-		
-		retval &= Arrays.equals(floatArray,	 other.getFloatArray());
+		check(retval, "IntArr Fields");
+
+		retval &= Arrays.equals(floatArray, other.getFloatArray());
 		retval &= Arrays.equals(floatArray2, other.getFloatArray2());
-		
-		retval &= Arrays.equals(longArray,	other.getLongArray());
+		check(retval, "FloatArr Fields");
+
+		retval &= Arrays.equals(longArray, other.getLongArray());
 		retval &= Arrays.equals(longArray2, other.getLongArray2());
-		retval &= Arrays.equals(doubleArray,	other.getDoubleArray());
-		retval &= Arrays.equals(doubleArray2, 	other.getDoubleArray2());
-		
+		check(retval, "LongArr Fields");
+
+		retval &= Arrays.equals(doubleArray, other.getDoubleArray());
+		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
+		check(retval, "DoubleArr Fields");
+
+		retval &= Arrays.equals(doubleArray, other.getDoubleArray());
+		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
+		check(retval, "BooleanArrs Fields");
 		return retval;
 	}
-	
+
+	private void check(boolean retval, String string) {
+		if (retval) {
+			System.out.println(string + " are equal");
+		}
+	}
+
 	public int computeSchemaSize() throws IllegalArgumentException, IllegalAccessException {
 		return RemoteObjectSerializer.computeSchemaSize(this);
 	}
@@ -302,6 +337,38 @@ public class TestRemoteObject implements RemoteObject {
 
 	public void setDoubleArray2(Double[] doubleArray2) {
 		this.doubleArray2 = doubleArray2;
+	}
+
+	public void setBooleanField(boolean booleanField) {
+		this.booleanField = booleanField;
+	}
+
+	public boolean isBooleanField() {
+		return booleanField;
+	}
+
+	public void setBooleanField2(Boolean booleanField2) {
+		this.booleanField2 = booleanField2;
+	}
+
+	public Boolean getBooleanField2() {
+		return booleanField2;
+	}
+
+	public boolean[] getBoolArray() {
+		return boolArray;
+	}
+
+	public void setBoolArray(boolean[] boolArray) {
+		this.boolArray = boolArray;
+	}
+
+	public Boolean[] getBoolArray2() {
+		return boolArray2;
+	}
+
+	public void setBoolArray2(Boolean[] boolArray2) {
+		this.boolArray2 = boolArray2;
 	}
 
 }

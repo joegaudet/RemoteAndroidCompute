@@ -25,10 +25,27 @@ public abstract class FieldSerializer {
 
 		});
 		
-		serializers.put(Boolean[].class, new FieldSerializer() {
+		serializers.put(boolean.class, new FieldSerializer() {
 			@Override
 			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
 				objectBuffer.put((byte) (((Boolean)object).booleanValue() ? 1 : 0));
+			}
+			
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, new Boolean(objectBuffer.get() == 1));
+			}
+			
+		});
+		
+		serializers.put(Boolean[].class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				Boolean[] arr = (Boolean[]) object;
+				objectBuffer.putInt(arr.length);
+				for(int i = 0; i < arr.length; i++){
+					objectBuffer.put((byte) (arr[i].booleanValue() ? 1 : 0));
+				}
 			}
 
 			@Override
@@ -36,6 +53,26 @@ public abstract class FieldSerializer {
 				Boolean[] arr = new Boolean[objectBuffer.getInt()];
 				for(int i = 0; i < arr.length; i++){
 					arr[i] = new Boolean(objectBuffer.get() == 1);
+				}
+				field.set(object, arr);
+			}
+		});
+		
+		serializers.put(boolean[].class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				boolean[] arr = (boolean[]) object;
+				objectBuffer.putInt(arr.length);
+				for(int i = 0; i < arr.length; i++){
+					objectBuffer.put((byte) (arr[i] ? 1 : 0));
+				}
+			}
+			
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				boolean[] arr = new boolean[objectBuffer.getInt()];
+				for(int i = 0; i < arr.length; i++){
+					arr[i] = objectBuffer.get() == 1;
 				}
 				field.set(object, arr);
 			}
@@ -52,6 +89,19 @@ public abstract class FieldSerializer {
 				field.set(object, new Byte(objectBuffer.get()));
 			}
 
+		});
+		
+		serializers.put(byte.class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				objectBuffer.put(((Byte)object).byteValue());
+			}
+			
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, new Byte(objectBuffer.get()));
+			}
+			
 		});
 		
 		serializers.put(byte[].class, new FieldSerializer() {
@@ -73,10 +123,10 @@ public abstract class FieldSerializer {
 		serializers.put(Byte[].class, new FieldSerializer() {
 			@Override
 			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
-				Byte[] byteArray = (Byte[]) object;
-				objectBuffer.putInt(byteArray.length);
-				for(int i = 0; i < byteArray.length; i++){
-					objectBuffer.put(byteArray[i].byteValue());
+				Byte[] arr = (Byte[]) object;
+				objectBuffer.putInt(arr.length);
+				for(int i = 0; i < arr.length; i++){
+					objectBuffer.put(arr[i].byteValue());
 				}
 			}
 
@@ -86,6 +136,7 @@ public abstract class FieldSerializer {
 				for(int i = 0; i < arr.length; i++){
 					arr[i] = new Byte(objectBuffer.get());
 				}
+				field.set(object,arr);
 			}
 		});
 		
@@ -97,7 +148,7 @@ public abstract class FieldSerializer {
 
 			@Override
 			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
-				field.set(object, (char) objectBuffer.get());
+				field.set(object, new Character(objectBuffer.getChar()));
 			}
 		});
 		
@@ -109,7 +160,7 @@ public abstract class FieldSerializer {
 			
 			@Override
 			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
-				field.set(object, (char) objectBuffer.get());
+				field.set(object, new Character(objectBuffer.getChar()));
 			}
 		});
 		
@@ -159,6 +210,18 @@ public abstract class FieldSerializer {
 				objectBuffer.putInt(((Integer)object).intValue());
 			}
 
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, new Integer(objectBuffer.getInt()));
+			}
+		});
+		
+		serializers.put(int.class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				objectBuffer.putInt(((Integer)object).intValue());
+			}
+			
 			@Override
 			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
 				field.set(object, new Integer(objectBuffer.getInt()));
@@ -217,6 +280,18 @@ public abstract class FieldSerializer {
 			}
 		});
 		
+		serializers.put(float.class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				objectBuffer.putFloat(((Float)object).floatValue());
+			}
+			
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, new Float(objectBuffer.getFloat()));
+			}
+		});
+		
 		serializers.put(Float[].class, new FieldSerializer() {
 			@Override
 			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
@@ -269,6 +344,18 @@ public abstract class FieldSerializer {
 			}
 		});
 		
+		serializers.put(long.class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				objectBuffer.putLong(((Long)object).longValue());
+			}
+			
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, objectBuffer.getLong());
+			}
+		});
+		
 		serializers.put(long[].class, new FieldSerializer() {
 			@Override
 			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
@@ -315,6 +402,18 @@ public abstract class FieldSerializer {
 				objectBuffer.putDouble(((Double)object).doubleValue());
 			}
 
+			@Override
+			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
+				field.set(object, new Double(objectBuffer.getDouble()));
+			}
+		});
+			
+		serializers.put(double.class, new FieldSerializer() {
+			@Override
+			protected void serializeObjectToBuffer(Object object, ByteBuffer objectBuffer) {
+				objectBuffer.putDouble(((Double)object).doubleValue());
+			}
+			
 			@Override
 			protected void deSerializeObjectFrom(Field field, Object object, ByteBuffer objectBuffer) throws IllegalAccessException, IllegalArgumentException {
 				field.set(object, new Double(objectBuffer.getDouble()));
@@ -376,7 +475,6 @@ public abstract class FieldSerializer {
 	public static void deserializeFieldTo(Field field, Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException {
 		FieldSerializer fieldSerializer = serializers.get(field.getType());
 		if(fieldSerializer != null){
-			objectBuffer.putInt(field.getName().hashCode());
 			try {
 				field.setAccessible(true);
 				fieldSerializer.deSerializeObjectFrom(field, object, objectBuffer);

@@ -103,4 +103,20 @@ public class TestHelper {
 		return retval;
 	}
 
+	public static boolean[] getAnonymousBooleanArray() {
+		boolean[] retval = new boolean[rand.nextInt(100)];
+		for(int i = 0; i < retval.length; i++){
+			retval[i] = rand.nextBoolean();
+		}
+		return retval;
+	}
+	
+	public static Boolean[] getAnonymousBooleanObjectArray() {
+		Boolean[] retval = new Boolean[rand.nextInt(100)];
+		for(int i = 0; i < retval.length; i++){
+			retval[i] = rand.nextBoolean();
+		}
+		return retval;
+	}
+
 }
