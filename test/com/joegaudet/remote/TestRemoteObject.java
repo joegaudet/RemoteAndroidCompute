@@ -47,6 +47,8 @@ public class TestRemoteObject implements RemoteObject {
 	private double[] doubleArray;
 	private Double[] doubleArray2;
 
+	private TestRemoteObject anotherObject;
+	
 	public TestRemoteObject() {
 
 	}
@@ -134,12 +136,17 @@ public class TestRemoteObject implements RemoteObject {
 		retval &= Arrays.equals(doubleArray, other.getDoubleArray());
 		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
 		check(retval, "BooleanArrs Fields");
+
+		retval &= !(anotherObject == null ^ other.getAnotherObject() == null); // both must be true or false
+		if(anotherObject != null && other.getAnotherObject() != null){
+			retval &= anotherObject.equals(other.getAnotherObject());
+		}
 		return retval;
 	}
 
 	private void check(boolean retval, String string) {
 		if (retval) {
-			System.out.println(string + " are equal");
+//			System.out.println(string + " are equal");
 		}
 	}
 
@@ -369,6 +376,14 @@ public class TestRemoteObject implements RemoteObject {
 
 	public void setBoolArray2(Boolean[] boolArray2) {
 		this.boolArray2 = boolArray2;
+	}
+
+	public void setAnotherObject(TestRemoteObject anotherObject) {
+		this.anotherObject = anotherObject;
+	}
+
+	public TestRemoteObject getAnotherObject() {
+		return anotherObject;
 	}
 
 }

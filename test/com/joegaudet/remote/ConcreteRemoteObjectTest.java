@@ -41,6 +41,25 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		
 		assertTrue(testRemoteObject.equals(readRemoteObject));
 	}
+	
+	public void testSerializeDeSerializeEquality_recursiveObjects() throws Exception {
+		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
+		TestRemoteObject testRemoteObject2 = new TestRemoteObject(new Random());
+		testRemoteObject.setAnotherObject(testRemoteObject2);
+		assertEquals(testRemoteObject.computeSchemaSize(), expectedSize * 2 + 8);
+		populateArraysObject(expectedSize * 2 + 8);
+
+		
+		FileChannel channel = new FileOutputStream(new File("test.obj")).getChannel();
+		RemoteObjectSerializer.writeFullRemoteObject(testRemoteObject, channel);
+		channel.close();
+		
+		channel = new FileInputStream(new File("test.obj")).getChannel();
+		TestRemoteObject readRemoteObject = (TestRemoteObject) RemoteObjectSerializer.readRemoteObject(channel);
+		channel.close();
+		
+		assertTrue(testRemoteObject.equals(readRemoteObject));
+	}
 
 	private void populateArraysObject(int expectedSize) throws IllegalAccessException {
 		// btyes

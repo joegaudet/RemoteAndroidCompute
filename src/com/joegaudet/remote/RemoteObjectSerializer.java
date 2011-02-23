@@ -16,13 +16,18 @@ public class RemoteObjectSerializer {
 	private static ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
 
 	public static void writeFullRemoteObject(RemoteObject remoteObject, WritableByteChannel channel) throws SerializerNotFoundException, IOException {
+		ByteBuffer objectBuffer = objectToByteBuffer(remoteObject);
+		if(objectBuffer != null)
+			channel.write(objectBuffer);
+	}
+
+	public static ByteBuffer objectToByteBuffer(RemoteObject remoteObject) throws SerializerNotFoundException {
 		Class<? extends RemoteObject> remoteClass = remoteObject.getClass();
 		Field[] declaredFields = remoteClass.getDeclaredFields();
+		ByteBuffer objectBuffer = null;
 		try {
 			int computeSchemaSize = computeSchemaSize(remoteObject);
-
-			ByteBuffer objectBuffer = ByteBuffer.allocate(computeSchemaSize);
-
+			objectBuffer = ByteBuffer.allocate(computeSchemaSize);
 			objectBuffer.putInt(computeSchemaSize);
 			String name = remoteClass.getName();
 			objectBuffer.putInt(name.length());
@@ -37,12 +42,12 @@ public class RemoteObjectSerializer {
 				}
 			}
 			objectBuffer.rewind();
-			channel.write(objectBuffer);
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 		} catch (IllegalAccessException e) {
 			e.printStackTrace();
 		}
+		return objectBuffer;
 	}
 
 	public static Object readRemoteObject(ReadableByteChannel channel) throws IOException, ClassNotFoundException, SerializerNotFoundException {
@@ -73,10 +78,40 @@ public class RemoteObjectSerializer {
 		}
 		return object;
 	}
+	
+	
+	public static Object readRemoteObject(ByteBuffer buffer) throws IOException, ClassNotFoundException, SerializerNotFoundException {
+		int length = buffer.getInt();
 
-	private static void readField(Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException {
+		ByteBuffer objectBuffer = ByteBuffer.allocate(length - 4);
+		byte[] thisObject = new byte[length - 4];
+		buffer.get(thisObject);
+		objectBuffer.put(thisObject);
+		objectBuffer.rewind();
+		
+		byte[] classNameBuffer = new byte[objectBuffer.getInt()];
+		objectBuffer.get(classNameBuffer);
+		String className = new String(classNameBuffer);
+		
+		Class<?> klass = Class.forName(className);
+		Object object = null;
+		try {
+			object = klass.newInstance();
+			while (objectBuffer.hasRemaining()) {
+				readField(object, objectBuffer);
+			}
+		} catch (InstantiationException e) {
+			e.printStackTrace();
+		} catch (IllegalAccessException e) {
+			e.printStackTrace();
+		}
+		return object;
+	}
+
+	private static void readField(Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException, IOException {
 		Field field = getFieldByHashCode(objectBuffer.getInt(), object);
 		if (field != null) {
+			field.setAccessible(true);
 			FieldSerializer.deserializeFieldTo(field, object, objectBuffer);
 		}
 	}
@@ -161,7 +196,7 @@ public class RemoteObjectSerializer {
 					}
 					
 					// recurse
-					else if (isAssignableFromAny(klass, RemoteObject.class)) {
+					else if (isAssignableFromAny(RemoteObject.class, klass)) {
 						size += 4 + RemoteObjectSerializer.computeSchemaSize((RemoteObject) object);
 					}
 				}

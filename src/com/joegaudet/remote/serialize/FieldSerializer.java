@@ -1,9 +1,13 @@
 package com.joegaudet.remote.serialize;
 
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.joegaudet.remote.RemoteObject;
+import com.joegaudet.remote.RemoteObjectSerializer;
 
 public abstract class FieldSerializer {
 
@@ -463,29 +467,48 @@ public abstract class FieldSerializer {
 	
 	public static void serializeTo(Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException{
 		Class<? extends Object> klass = object.getClass();
-		FieldSerializer fieldSerializer = serializers.get(klass);
-		if(fieldSerializer != null){
-			fieldSerializer.serializeObjectToBuffer(object, objectBuffer);
+		System.out.println();
+		if(RemoteObject.class.isAssignableFrom(klass)){
+			objectBuffer.put(RemoteObjectSerializer.objectToByteBuffer((RemoteObject) object));
 		}
 		else {
-			throw new SerializerNotFoundException();
+			FieldSerializer fieldSerializer = serializers.get(klass);
+			if(fieldSerializer != null){
+				fieldSerializer.serializeObjectToBuffer(object, objectBuffer);
+			}
+			else {
+				throw new SerializerNotFoundException();
+			}
 		}
 	}
 	
-	public static void deserializeFieldTo(Field field, Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException {
-		FieldSerializer fieldSerializer = serializers.get(field.getType());
-		if(fieldSerializer != null){
+	public static void deserializeFieldTo(Field field, Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException, IOException {
+		Class<?> type = field.getType();
+		if(RemoteObject.class.isAssignableFrom(type)){
 			try {
-				field.setAccessible(true);
-				fieldSerializer.deSerializeObjectFrom(field, object, objectBuffer);
+				field.set(object, RemoteObjectSerializer.readRemoteObject(objectBuffer));
 			} catch (IllegalArgumentException e) {
 				e.printStackTrace();
 			} catch (IllegalAccessException e) {
 				e.printStackTrace();
+			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
 			}
 		}
 		else {
-			throw new SerializerNotFoundException();
+			FieldSerializer fieldSerializer = serializers.get(type);
+			if(fieldSerializer != null){
+				try {
+					fieldSerializer.deSerializeObjectFrom(field, object, objectBuffer);
+				} catch (IllegalArgumentException e) {
+					e.printStackTrace();
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+			else {
+				throw new SerializerNotFoundException();
+			}
 		}
 	}
 
