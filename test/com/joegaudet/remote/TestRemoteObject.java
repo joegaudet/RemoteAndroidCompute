@@ -137,10 +137,11 @@ public class TestRemoteObject implements RemoteObject {
 		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
 		check(retval, "BooleanArrs Fields");
 
-		retval &= !(anotherObject == null ^ other.getAnotherObject() == null); // both must be true or false
-		if(anotherObject != null && other.getAnotherObject() != null){
-			retval &= anotherObject.equals(other.getAnotherObject());
-		}
+//		retval &= !(anotherObject == null ^ other.getAnotherObject() == null); // both must be true or false
+//		if(anotherObject != null && other.getAnotherObject() != null){
+//			retval &= anotherObject.equals(other.getAnotherObject());
+//		}
+		System.out.println(retval);
 		return retval;
 	}
 
@@ -152,6 +153,10 @@ public class TestRemoteObject implements RemoteObject {
 
 	public int computeSchemaSize() throws IllegalArgumentException, IllegalAccessException {
 		return RemoteObjectSerializer.computeSchemaSize(this);
+	}
+	
+	public int computeSchemaSizeNoRefs() throws IllegalArgumentException, IllegalAccessException {
+		return RemoteObjectSerializer.computeSchemaSizeNoRefs(this);
 	}
 
 	public char getCharField() {
@@ -385,5 +390,6 @@ public class TestRemoteObject implements RemoteObject {
 	public TestRemoteObject getAnotherObject() {
 		return anotherObject;
 	}
+
 
 }

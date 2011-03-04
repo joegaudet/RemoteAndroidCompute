@@ -464,12 +464,12 @@ public abstract class FieldSerializer {
 			}
 		});
 	}
-	
+
 	public static void serializeTo(Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException{
 		Class<? extends Object> klass = object.getClass();
-		System.out.println();
 		if(RemoteObject.class.isAssignableFrom(klass)){
-			objectBuffer.put(RemoteObjectSerializer.objectToByteBuffer((RemoteObject) object));
+			objectBuffer.putInt(object.hashCode());
+			RemoteObjectSerializer.pushObject((RemoteObject) object);
 		}
 		else {
 			FieldSerializer fieldSerializer = serializers.get(klass);
@@ -484,16 +484,14 @@ public abstract class FieldSerializer {
 	
 	public static void deserializeFieldTo(Field field, Object object, ByteBuffer objectBuffer) throws SerializerNotFoundException, IOException {
 		Class<?> type = field.getType();
+		
+		// if it's an object we need to check if we've already 
+		// found it
 		if(RemoteObject.class.isAssignableFrom(type)){
-			try {
-				field.set(object, RemoteObjectSerializer.readRemoteObject(objectBuffer));
-			} catch (IllegalArgumentException e) {
-				e.printStackTrace();
-			} catch (IllegalAccessException e) {
-				e.printStackTrace();
-			} catch (ClassNotFoundException e) {
-				e.printStackTrace();
-			}
+			System.out.println("Remote Object: ignoring till later");
+			int hashCode = objectBuffer.getInt();
+			RemoteObjectSerializer.addObjectLinkResolution(new ObjectLinkResolution(object, field, hashCode));
+			System.out.println("ObjectBuffer: " + objectBuffer.remaining());
 		}
 		else {
 			FieldSerializer fieldSerializer = serializers.get(type);
