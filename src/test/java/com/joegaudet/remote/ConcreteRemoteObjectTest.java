@@ -20,14 +20,21 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		testRemoteObject = new TestRemoteObject(new Random());
 	}
 
+	@Override
+	protected void tearDown() throws Exception {
+		super.tearDown();
+		RemoteObjectSerializer.resetStoredHashCodes();
+		new File("test.obj").delete();
+	}
+	
 	public void testComputeSchema() throws Exception {
-		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
+		int expectedSize = 60 + 14 * 4 + (8 + TestRemoteObject.class.getName().length());
 		assertEquals(expectedSize,testRemoteObject.computeSchemaSize());
 		populateArraysObject(expectedSize);
 	}
 	
 	public void testSerializeDeSerializeEquality() throws Exception {
-		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
+		int expectedSize = 60 + 14 * 4 + (8 + TestRemoteObject.class.getName().length());
 		assertEquals(expectedSize, testRemoteObject.computeSchemaSize());
 		populateArraysObject(expectedSize);
 		
@@ -71,9 +78,10 @@ public class ConcreteRemoteObjectTest extends TestCase {
 	}
 	
 	public void testSerializeDeSerializeEquality_circularGuard() throws Exception {
-		int expectedSize = 60 + 14 * 4 + (4 + TestRemoteObject.class.getName().length());
+		System.out.println("THIS TEST");
+		int expectedSize = 60 + 14 * 4 + (8 + TestRemoteObject.class.getName().length());
 		testRemoteObject.setAnotherObject(testRemoteObject);
-		expectedSize += 16; // add the size of the new object
+		expectedSize += 8; // add the size of the new object
 		assertEquals(expectedSize, testRemoteObject.computeSchemaSize());
 		populateArraysObject(expectedSize );
 		
@@ -90,6 +98,7 @@ public class ConcreteRemoteObjectTest extends TestCase {
 		
 		assert(testRemoteObject == testRemoteObject.getAnotherObject());
 		assert(readRemoteObject == readRemoteObject.getAnotherObject());
+		System.out.println("END THIS TEST");
 		
 	}
 
