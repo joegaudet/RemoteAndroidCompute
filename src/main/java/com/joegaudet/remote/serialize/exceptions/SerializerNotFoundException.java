@@ -1,4 +1,4 @@
-package com.joegaudet.remote.serialize;
+package com.joegaudet.remote.serialize.exceptions;
 
 @SuppressWarnings("serial")
 public class SerializerNotFoundException extends Exception {

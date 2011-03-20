@@ -111,12 +111,56 @@ public class TestHelper {
 		return retval;
 	}
 	
+	public static short[] getAnonymousShortArray() {
+		short[] retval = new short[rand.nextInt(100)];
+		for(int i = 0; i < retval.length; i++){
+			retval[i] = (short) rand.nextInt();
+		}
+		return retval;
+	}
+	
 	public static Boolean[] getAnonymousBooleanObjectArray() {
 		Boolean[] retval = new Boolean[rand.nextInt(100)];
 		for(int i = 0; i < retval.length; i++){
 			retval[i] = rand.nextBoolean();
 		}
 		return retval;
+	}
+
+	public static byte getAnonymousByte() {
+		return (byte) (rand.nextInt() & 0xff);
+	}
+
+	public static boolean getAnonymousBoolean() {
+		return rand.nextBoolean();
+	}
+
+	public static short getAnonymousShort() {
+		return (short) rand.nextInt();
+	}
+
+	public static char getAnonymousCharacter() {
+		return (char) rand.nextInt();
+	}
+
+	public static int getAnonymousInt() {
+		return rand.nextInt();
+	}
+
+	public static float getAnonymousFloat() {
+		return rand.nextFloat();
+	}
+
+	public static long getAnonymousLong() {
+		return rand.nextLong();
+	}
+
+	public static double getAnonymousDouble() {
+		return rand.nextDouble();
+	}
+
+	public static String getAnonymousString(String string) {
+		return string + " " + rand.nextInt();
 	}
 
 }

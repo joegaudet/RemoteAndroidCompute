@@ -1,4 +1,4 @@
-package com.joegaudet.remote;
+package com.joegaudet.remote.serialize;
 
 import java.io.IOException;
 import java.lang.reflect.Field;
@@ -13,12 +13,11 @@ import java.util.Stack;
 
 import com.joegaudet.list.FArrayList;
 import com.joegaudet.list.Filter;
-import com.joegaudet.remote.serialize.FieldSerializer;
-import com.joegaudet.remote.serialize.ObjectLinkResolution;
-import com.joegaudet.remote.serialize.ObjectResolutionException;
-import com.joegaudet.remote.serialize.SerializerNotFoundException;
+import com.joegaudet.remote.RemoteObject;
+import com.joegaudet.remote.serialize.exceptions.ObjectResolutionException;
+import com.joegaudet.remote.serialize.exceptions.SerializerNotFoundException;
 
-public class RemoteObjectSerializer {
+public class RemoteObjectSerializer2 {
 
 	private static ByteBuffer lengthBuffer = ByteBuffer.allocate(4);
 
@@ -259,7 +258,7 @@ public class RemoteObjectSerializer {
 						// object
 						if (includeReferences && !(object == remoteObject || sizedHashCodes.contains(object.hashCode()))) {
 							// size of the ref + size of the object
-							size += RemoteObjectSerializer.computeSchemaSize((RemoteObject) object);
+							size += RemoteObjectSerializer2.computeSchemaSize((RemoteObject) object);
 						}
 					}
 				}

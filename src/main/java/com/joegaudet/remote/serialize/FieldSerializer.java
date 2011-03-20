@@ -7,7 +7,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.joegaudet.remote.RemoteObject;
-import com.joegaudet.remote.RemoteObjectSerializer;
+import com.joegaudet.remote.serialize.exceptions.SerializerNotFoundException;
+import com.joegaudet.util.Log;
 
 public abstract class FieldSerializer {
 
@@ -469,7 +470,7 @@ public abstract class FieldSerializer {
 		Class<? extends Object> klass = object.getClass();
 		if(RemoteObject.class.isAssignableFrom(klass)){
 			objectBuffer.putInt(object.hashCode());
-			RemoteObjectSerializer.pushObject((RemoteObject) object);
+			RemoteObjectSerializer2.pushObject((RemoteObject) object);
 		}
 		else {
 			FieldSerializer fieldSerializer = serializers.get(klass);
@@ -488,10 +489,10 @@ public abstract class FieldSerializer {
 		// if it's an object we need to check if we've already 
 		// found it
 		if(RemoteObject.class.isAssignableFrom(type)){
-			System.out.println("Remote Object: ignoring till later");
+			Log.debug("Remote Object: ignoring till later");
 			int hashCode = objectBuffer.getInt();
-			RemoteObjectSerializer.addObjectLinkResolution(new ObjectLinkResolution(object, field, hashCode));
-			System.out.println("ObjectBuffer: " + objectBuffer.remaining());
+//			RemoteObjectSerializer2.addObjectLinkResolution(new ObjectLinkResolution(object, field, hashCode));
+			Log.debug("ObjectBuffer: " + objectBuffer.remaining());
 		}
 		else {
 			FieldSerializer fieldSerializer = serializers.get(type);

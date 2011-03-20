@@ -1,395 +1,180 @@
 package com.joegaudet.remote;
 
-import java.util.Arrays;
-import java.util.Random;
+import com.joegaudet.remote.fields.arrays.BooleanArrayField;
+import com.joegaudet.remote.fields.arrays.ByteArrayField;
+import com.joegaudet.remote.fields.arrays.CharArrayField;
+import com.joegaudet.remote.fields.arrays.DoubleArrayField;
+import com.joegaudet.remote.fields.arrays.FloatArrayField;
+import com.joegaudet.remote.fields.arrays.IntArrayField;
+import com.joegaudet.remote.fields.arrays.LongArrayField;
+import com.joegaudet.remote.fields.arrays.ShortArrayField;
+import com.joegaudet.remote.fields.primatives.BooleanField;
+import com.joegaudet.remote.fields.primatives.ByteField;
+import com.joegaudet.remote.fields.primatives.CharacterField;
+import com.joegaudet.remote.fields.primatives.DoubleField;
+import com.joegaudet.remote.fields.primatives.FloatField;
+import com.joegaudet.remote.fields.primatives.IntegerField;
+import com.joegaudet.remote.fields.primatives.LongField;
+import com.joegaudet.remote.fields.primatives.ShortField;
+import com.joegaudet.remote.fields.primatives.StringField;
 
-public class TestRemoteObject implements RemoteObject {
 
-	private char charField;
-	private Character characterField;
+public class TestRemoteObject extends AbstractRemoteObject {
 
-	private byte byteField;
-	private Byte byteField2;
-
-	private boolean booleanField;
-	private Boolean booleanField2;
-
-	private int intField;
-	private Integer integerField;
-
-	private float floatField;
-	private Float floatField2;
-
-	private long longField;
-	private Long longField2;
-
-	private double doubleField;
-	private Double doubleField2;
-
-	private boolean[] boolArray;
-	private Boolean[] boolArray2;
+	private ByteArrayField 		byteArrayField;
+	private BooleanArrayField 	booleanArrayField;
+	private ShortArrayField 	shortArrayField;
+	private CharArrayField 		charArrayField;
+	private IntArrayField 		intArrayField;
+	private FloatArrayField 	floatArrayField;
+	private LongArrayField 		longArrayField;
+	private DoubleArrayField 	doubleArrayField;
 	
-	private byte[] byteArray;
-	private Byte[] byteArray2;
-
-	private char[] charArray;
-	private Character[] characterArray;
-
-	private int[] intArray;
-	private Integer[] integerArray2;
-
-	private float[] floatArray;
-	private Float[] floatArray2;
-
-	private long[] longArray;
-	private Long[] longArray2;
-
-	private double[] doubleArray;
-	private Double[] doubleArray2;
-
-	private TestRemoteObject anotherObject;
+	private ByteField 		byteField;
+	private BooleanField 	booleanField;
+	private ShortField 		shortField;
+	private CharacterField 	charField;
+	private IntegerField 	intField;
+	private FloatField 		floatField;
+	private LongField 		longField;
+	private DoubleField 	doubleField;
+	private StringField 	stringField;
 	
-	public TestRemoteObject() {
-
-	}
-
-	public TestRemoteObject(Random rand) {
-		charField = (char) rand.nextInt(255);
-		characterField = (char) rand.nextInt(255);
-
-		byteField = (byte) rand.nextInt(255);
-		byteField2 = (byte) rand.nextInt(255);
-
-		booleanField = rand.nextBoolean();
-		booleanField2 = rand.nextBoolean();
-
-		intField = rand.nextInt(255);
-		integerField = rand.nextInt(255);
-
-		floatField = rand.nextFloat();
-		floatField2 = rand.nextFloat();
-
-		longField = rand.nextLong();
-		longField2 = rand.nextLong();
-
-		doubleField = rand.nextDouble();
-		doubleField2 = rand.nextDouble();
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-
-		if (!(obj instanceof TestRemoteObject))
-			return false;
-
-		TestRemoteObject other = (TestRemoteObject) obj;
-		boolean retval = true;
-
-		retval &= byteField == other.getByteField();
-		retval &= byteField2.equals(other.getByteField2());
-		check(retval, "Byte Fields");
-
-		retval &= booleanField == other.isBooleanField();
-		retval &= booleanField2.equals(other.getBooleanField2());
-		check(retval, "Boolean Fields");
-
-		retval &= charField == other.getCharField();
-		retval &= characterField.equals(other.getCharacterField());
-		check(retval, "Char Fields");
-
-		retval &= intField == other.getIntField();
-		retval &= integerField.equals(other.getIntegerField());
-		check(retval, "Int Fields");
-
-		retval &= floatField == other.getFloatField();
-		retval &= floatField2.equals(other.getFloatField2());
-		check(retval, "Float Fields");
-
-		retval &= longField == other.getLongField();
-		retval &= longField2.equals(other.getLongField2());
-		check(retval, "Long Fields");
-
-		retval &= Arrays.equals(byteArray, other.getByteArray());
-		retval &= Arrays.equals(byteArray2, other.getByteArray2());
-		check(retval, "ByteArr Fields");
-
-		retval &= Arrays.equals(charArray, other.getCharArray());
-		retval &= Arrays.equals(characterArray, other.getCharacterArray());
-		check(retval, "CharArr Fields");
-
-		retval &= Arrays.equals(intArray, other.getIntArray());
-		retval &= Arrays.equals(integerArray2, other.getIntegerArray2());
-		check(retval, "IntArr Fields");
-
-		retval &= Arrays.equals(floatArray, other.getFloatArray());
-		retval &= Arrays.equals(floatArray2, other.getFloatArray2());
-		check(retval, "FloatArr Fields");
-
-		retval &= Arrays.equals(longArray, other.getLongArray());
-		retval &= Arrays.equals(longArray2, other.getLongArray2());
-		check(retval, "LongArr Fields");
-
-		retval &= Arrays.equals(doubleArray, other.getDoubleArray());
-		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
-		check(retval, "DoubleArr Fields");
-
-		retval &= Arrays.equals(doubleArray, other.getDoubleArray());
-		retval &= Arrays.equals(doubleArray2, other.getDoubleArray2());
-		check(retval, "BooleanArrs Fields");
-
-//		retval &= !(anotherObject == null ^ other.getAnotherObject() == null); // both must be true or false
-//		if(anotherObject != null && other.getAnotherObject() != null){
-//			retval &= anotherObject.equals(other.getAnotherObject());
-//		}
-		System.out.println(retval);
-		return retval;
-	}
-
-	private void check(boolean retval, String string) {
-		if (retval) {
-//			System.out.println(string + " are equal");
-		}
-	}
-
-	public int computeSchemaSize() throws IllegalArgumentException, IllegalAccessException {
-		return RemoteObjectSerializer.computeSchemaSize(this);
+	public byte getByteField(){
+		return byteField.get();
 	}
 	
-	public int computeSchemaSizeNoRefs() throws IllegalArgumentException, IllegalAccessException {
-		return RemoteObjectSerializer.computeSchemaSizeNoRefs(this);
+	public void setByteField(byte value){
+		byteField.set(value);
 	}
 
-	public char getCharField() {
-		return charField;
+	public boolean getBooleanField(){
+		return booleanField.get();
+	}
+	
+	public void setBooleanField(boolean value){
+		booleanField.set(value);
+	}
+	
+	public short getShortField(){
+		return shortField.get();
+	}
+	
+	public void setShortField(short value){
+		shortField.set(value);
+	}
+	
+	public char getCharField(){
+		return charField.get();
+	}
+	
+	public void setCharField(char value){
+		charField.set(value);
+	}
+	
+	public int getIntField(){
+		return intField.get();
+	}
+	
+	public void setIntField(int value){
+		intField.set(value);
+	}
+	
+	public float getFloatField(){
+		return floatField.get();
+	}
+	
+	public void setFloatField(float value){
+		floatField.set(value);
+	}
+	
+	public long getLongField(){
+		return longField.get();
+	}
+	
+	public void setLongField(long value){
+		longField.set(value);
+	}
+	
+	public double getDoubleField(){
+		return doubleField.get();
+	}
+	
+	public void setDoubleField(double value){
+		doubleField.set(value);
+	}
+	
+	public String getStringField(){
+		return stringField.get();
+	}
+	
+	public void setStringField(String value){
+		stringField.set(value);
+	}
+	
+	public byte[] getByteArrayField() {
+		return byteArrayField.get();
+	}
+	
+	public void setByteArrayField(byte[] value) {
+		byteArrayField.set(value);
+	}
+	
+	public boolean[] getBooleanArrayField() {
+		return booleanArrayField.get();
+	}
+	
+	public void setBooleanArrayField(boolean[] value) {
+		booleanArrayField.set(value);
 	}
 
-	public void setCharField(char charField) {
-		this.charField = charField;
+	public short[] getShortArrayField() {
+		return shortArrayField.get();
+	}
+	
+	public void setShortArrayField(short[] value) {
+		shortArrayField.set(value);
 	}
 
-	public Character getCharacterField() {
-		return characterField;
+	public char[] getCharArrayField() {
+		return charArrayField.get();
 	}
-
-	public void setCharacterField(Character characterField) {
-		this.characterField = characterField;
+	
+	public void setCharArrayField(char[] value) {
+		charArrayField.set(value);
 	}
-
-	public byte getByteField() {
-		return byteField;
+	
+	public int[] getIntArrayField() {
+		return intArrayField.get();
 	}
-
-	public void setByteField(byte byteField) {
-		this.byteField = byteField;
+	
+	public void setIntArrayField(int[] value) {
+		intArrayField.set(value);
 	}
-
-	public Byte getByteField2() {
-		return byteField2;
+	
+	public float[] getFloatArrayField() {
+		return floatArrayField.get();
 	}
-
-	public void setByteField2(Byte byteField2) {
-		this.byteField2 = byteField2;
+	
+	public void setFloatArrayField(float[] value) {
+		floatArrayField.set(value);
 	}
-
-	public int getIntField() {
-		return intField;
+	
+	public long[] getLongArrayField() {
+		return longArrayField.get();
 	}
-
-	public void setIntField(int intField) {
-		this.intField = intField;
+	
+	public void setLongArrayField(long[] value) {
+		longArrayField.set(value);
 	}
-
-	public Integer getIntegerField() {
-		return integerField;
+	
+	public double[] getDoubleArrayField() {
+		return doubleArrayField.get();
 	}
-
-	public void setIntegerField(Integer integerField) {
-		this.integerField = integerField;
+	
+	public void setDoubleArrayField(double[] value) {
+		doubleArrayField.set(value);
 	}
-
-	public float getFloatField() {
-		return floatField;
-	}
-
-	public void setFloatField(float floatField) {
-		this.floatField = floatField;
-	}
-
-	public Float getFloatField2() {
-		return floatField2;
-	}
-
-	public void setFloatField2(Float floatField2) {
-		this.floatField2 = floatField2;
-	}
-
-	public long getLongField() {
-		return longField;
-	}
-
-	public void setLongField(long longField) {
-		this.longField = longField;
-	}
-
-	public Long getLongField2() {
-		return longField2;
-	}
-
-	public void setLongField2(Long longField2) {
-		this.longField2 = longField2;
-	}
-
-	public double getDoubleField() {
-		return doubleField;
-	}
-
-	public void setDoubleField(double doubleField) {
-		this.doubleField = doubleField;
-	}
-
-	public Double getDoubleField2() {
-		return doubleField2;
-	}
-
-	public void setDoubleField2(Double doubleField2) {
-		this.doubleField2 = doubleField2;
-	}
-
-	public byte[] getByteArray() {
-		return byteArray;
-	}
-
-	public void setByteArray(byte[] byteArray) {
-		this.byteArray = byteArray;
-	}
-
-	public Byte[] getByteArray2() {
-		return byteArray2;
-	}
-
-	public void setByteArray2(Byte[] byteArray2) {
-		this.byteArray2 = byteArray2;
-	}
-
-	public char[] getCharArray() {
-		return charArray;
-	}
-
-	public void setCharArray(char[] charArray) {
-		this.charArray = charArray;
-	}
-
-	public Character[] getCharacterArray() {
-		return characterArray;
-	}
-
-	public void setCharacterArray(Character[] characterArray) {
-		this.characterArray = characterArray;
-	}
-
-	public int[] getIntArray() {
-		return intArray;
-	}
-
-	public void setIntArray(int[] intArray) {
-		this.intArray = intArray;
-	}
-
-	public Integer[] getIntegerArray2() {
-		return integerArray2;
-	}
-
-	public void setIntegerArray2(Integer[] integerArray2) {
-		this.integerArray2 = integerArray2;
-	}
-
-	public float[] getFloatArray() {
-		return floatArray;
-	}
-
-	public void setFloatArray(float[] floatArray) {
-		this.floatArray = floatArray;
-	}
-
-	public Float[] getFloatArray2() {
-		return floatArray2;
-	}
-
-	public void setFloatArray2(Float[] floatArray2) {
-		this.floatArray2 = floatArray2;
-	}
-
-	public long[] getLongArray() {
-		return longArray;
-	}
-
-	public void setLongArray(long[] longArray) {
-		this.longArray = longArray;
-	}
-
-	public Long[] getLongArray2() {
-		return longArray2;
-	}
-
-	public void setLongArray2(Long[] longArray2) {
-		this.longArray2 = longArray2;
-	}
-
-	public double[] getDoubleArray() {
-		return doubleArray;
-	}
-
-	public void setDoubleArray(double[] doubleArray) {
-		this.doubleArray = doubleArray;
-	}
-
-	public Double[] getDoubleArray2() {
-		return doubleArray2;
-	}
-
-	public void setDoubleArray2(Double[] doubleArray2) {
-		this.doubleArray2 = doubleArray2;
-	}
-
-	public void setBooleanField(boolean booleanField) {
-		this.booleanField = booleanField;
-	}
-
-	public boolean isBooleanField() {
-		return booleanField;
-	}
-
-	public void setBooleanField2(Boolean booleanField2) {
-		this.booleanField2 = booleanField2;
-	}
-
-	public Boolean getBooleanField2() {
-		return booleanField2;
-	}
-
-	public boolean[] getBoolArray() {
-		return boolArray;
-	}
-
-	public void setBoolArray(boolean[] boolArray) {
-		this.boolArray = boolArray;
-	}
-
-	public Boolean[] getBoolArray2() {
-		return boolArray2;
-	}
-
-	public void setBoolArray2(Boolean[] boolArray2) {
-		this.boolArray2 = boolArray2;
-	}
-
-	public void setAnotherObject(TestRemoteObject anotherObject) {
-		this.anotherObject = anotherObject;
-	}
-
-	public TestRemoteObject getAnotherObject() {
-		return anotherObject;
-	}
-
 
 }
+

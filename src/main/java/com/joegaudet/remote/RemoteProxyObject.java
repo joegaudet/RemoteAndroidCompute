@@ -4,13 +4,6 @@ import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.rmi.NotBoundException;
-import java.rmi.RemoteException;
-import java.rmi.registry.LocateRegistry;
-import java.rmi.registry.Registry;
-
-import com.joegaudet.remote.compute.Compute;
-import com.joegaudet.remote.compute.OffloadComputeTask;
 
 @SuppressWarnings("serial")
 public class RemoteProxyObject implements InvocationHandler, Serializable {
@@ -51,18 +44,18 @@ public class RemoteProxyObject implements InvocationHandler, Serializable {
 	private Object conditionallyInvokeRemote(Method m, final Object[] args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
 //		System.out.println("Detected a remote annotation attempting to Inoke Method: " + m.getName() + " remotely.");
 		
-		Object retval = null;
-		OffloadComputeTask task = new OffloadComputeTask(object, m.getName(), args, m.getParameterTypes());
-		try {
-			Registry registry = LocateRegistry.getRegistry("50.56.71.70",1099);
-			Compute comp = (Compute) registry.lookup("Compute");
-			retval = comp.executeTask(task);
-		} catch (RemoteException e) {
-			e.printStackTrace();
-		} catch (NotBoundException e) {
-			e.printStackTrace();
-		}
-		return retval;
+//		Object retval = null;
+//		OffloadComputeTask task = new OffloadComputeTask(object, m.getName(), args, m.getParameterTypes());
+//		try {
+//			Registry registry = LocateRegistry.getRegistry("50.56.71.70",1099);
+//			Compute comp = (Compute) registry.lookup("Compute");
+//			retval = comp.executeTask(task);
+//		} catch (RemoteException e) {
+//			e.printStackTrace();
+//		} catch (NotBoundException e) {
+//			e.printStackTrace();
+//		}
+		return null;
 	}
 
 }
