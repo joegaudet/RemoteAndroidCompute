@@ -20,9 +20,23 @@ public class RemoteObjectSerializer extends OneTimeVisitor {
 		remoteObjects = new Stack<RemoteObject>();
 	}
 
+
+	public void serialize(RemoteObject object, ByteBuffer buffer) {
+		int schemaSize = new SchemaSizeVisitor(object).computeSchemaSize();
+		this.buffer = buffer;
+		writeToBuffer(object, schemaSize, buffer);
+	}
+	
 	public ByteBuffer serialize(RemoteObject object) {
 		int schemaSize = new SchemaSizeVisitor(object).computeSchemaSize();
 		buffer = ByteBuffer.allocate(schemaSize + 4);
+		writeToBuffer(object, schemaSize, buffer);
+		buffer.rewind();
+		return buffer;
+	}
+
+
+	private void writeToBuffer(RemoteObject object, int schemaSize, ByteBuffer buffer) {
 		buffer.putInt(schemaSize);
 		object.serialize(buffer);
 		visitedHashCodes.add(object.hashCode());
@@ -44,8 +58,6 @@ public class RemoteObjectSerializer extends OneTimeVisitor {
 				}
 			}
 		}
-		buffer.rewind();
-		return buffer;
 	}
 
 	public void writeObjectToChannel(RemoteObject object, WritableByteChannel channel) throws IOException {

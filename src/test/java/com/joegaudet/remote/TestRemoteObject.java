@@ -1,5 +1,10 @@
 package com.joegaudet.remote;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
+import java.util.Arrays;
+
 import com.joegaudet.remote.fields.arrays.BooleanArrayField;
 import com.joegaudet.remote.fields.arrays.ByteArrayField;
 import com.joegaudet.remote.fields.arrays.CharArrayField;
@@ -17,6 +22,8 @@ import com.joegaudet.remote.fields.primatives.IntegerField;
 import com.joegaudet.remote.fields.primatives.LongField;
 import com.joegaudet.remote.fields.primatives.ShortField;
 import com.joegaudet.remote.fields.primatives.StringField;
+import com.joegaudet.remote.visitors.ObjectSizeVisitor;
+import com.joegaudet.util.TestHelper;
 
 
 public class TestRemoteObject extends AbstractRemoteObject {
@@ -39,6 +46,100 @@ public class TestRemoteObject extends AbstractRemoteObject {
 	private LongField 		longField;
 	private DoubleField 	doubleField;
 	private StringField 	stringField;
+	
+	
+	public int initializeRemoteObject() throws IllegalAccessException {
+
+		int expectedSize = header();
+
+		this.setByteField(TestHelper.getAnonymousByte());
+		expectedSize += 5;
+
+		this.setBooleanField(TestHelper.getAnonymousBoolean());
+		expectedSize += 5;
+
+		this.setShortField(TestHelper.getAnonymousShort());
+		expectedSize += 6;
+
+		this.setCharField(TestHelper.getAnonymousCharacter());
+		expectedSize += 6;
+
+		this.setIntField(TestHelper.getAnonymousInt());
+		expectedSize += 8;
+
+		this.setFloatField(TestHelper.getAnonymousFloat());
+		expectedSize += 8;
+
+		this.setLongField(TestHelper.getAnonymousLong());
+		expectedSize += 12;
+
+		this.setDoubleField(TestHelper.getAnonymousDouble());
+		expectedSize += 12;
+
+		String string = TestHelper.getAnonymousString("Test String");
+		this.setStringField(string);
+		expectedSize += 8 + string.length();
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		
+		// bytes
+		byte[] byteArray = TestHelper.getAnonymousByteArray();
+		this.setByteArrayField(byteArray);
+		expectedSize += byteArray.length + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// booleans
+		boolean[] booleanArray = TestHelper.getAnonymousBooleanArray();
+		this.setBooleanArrayField(booleanArray);
+		expectedSize += booleanArray.length + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// char arrays
+		char[] charArray = TestHelper.getAnonymousCharArray();
+		this.setCharArrayField(charArray);
+		expectedSize += charArray.length * 2 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// short arrays
+		short[] shortArray = TestHelper.getAnonymousShortArray();
+		this.setShortArrayField(shortArray);
+		expectedSize += shortArray.length * 2 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// int arrays
+		int[] intArray = TestHelper.getAnonymousIntArray();
+		this.setIntArrayField(intArray);
+		expectedSize += intArray.length * 4 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// float arrays
+		float[] floatArray = TestHelper.getAnonymousFloatArray();
+		this.setFloatArrayField(floatArray);
+		expectedSize += floatArray.length * 4 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// long arrays
+		long[] longArray = TestHelper.getAnonymousLongArray();
+		this.setLongArrayField(longArray);
+		expectedSize += longArray.length * 8 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		// long arrays
+		double[] doubleArray = TestHelper.getAnonymousDoubleArray();
+		this.setDoubleArrayField(doubleArray);
+		expectedSize += doubleArray.length * 8 + 8;
+		assertEquals(expectedSize, new ObjectSizeVisitor(this).computeObjectSize());
+
+		return expectedSize;
+	}
+
+	public int header() {
+		int expectedSize = 4; // object size
+		expectedSize += 4; // class name size
+		expectedSize += 4; // remote object hash code
+		expectedSize += this.getClass().getName().length();
+		return expectedSize;
+	}
 	
 	public byte getByteField(){
 		return byteField.get();
@@ -174,6 +275,31 @@ public class TestRemoteObject extends AbstractRemoteObject {
 	
 	public void setDoubleArrayField(double[] value) {
 		doubleArrayField.set(value);
+	}
+	
+
+	public void assertObjectEquals(TestRemoteObject object) {
+		// primatives fields
+		assertEquals(this.getBooleanField(), object.getBooleanField());
+		assertEquals(this.getByteField(), object.getByteField());
+		assertEquals(this.getCharField(), object.getCharField());
+		assertEquals(this.getDoubleField(), object.getDoubleField(), 0);
+		assertEquals(this.getFloatField(), object.getFloatField(), 0);
+		assertEquals(this.getIntField(), object.getIntField());
+		assertEquals(this.getLongField(), object.getLongField());
+		assertEquals(this.getShortField(), object.getShortField());
+		assertEquals(this.getStringField(), object.getStringField());
+
+		// primative arrays
+
+		assertTrue(Arrays.equals(this.getBooleanArrayField(), object.getBooleanArrayField()));
+		assertTrue(Arrays.equals(this.getByteArrayField(), object.getByteArrayField()));
+		assertTrue(Arrays.equals(this.getCharArrayField(), object.getCharArrayField()));
+		assertTrue(Arrays.equals(this.getDoubleArrayField(), object.getDoubleArrayField()));
+		assertTrue(Arrays.equals(this.getFloatArrayField(), object.getFloatArrayField()));
+		assertTrue(Arrays.equals(this.getIntArrayField(), object.getIntArrayField()));
+		assertTrue(Arrays.equals(this.getLongArrayField(), object.getLongArrayField()));
+		assertTrue(Arrays.equals(this.getShortArrayField(), object.getShortArrayField()));
 	}
 
 }

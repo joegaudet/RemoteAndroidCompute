@@ -1,18 +1,26 @@
 package com.joegaudet.remote;
 
+import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SocketChannel;
+
+import com.joegaudet.remote.serialize.RemoteObjectSerializer;
 
 @SuppressWarnings("serial")
 public class RemoteProxyObject implements InvocationHandler, Serializable {
 
 	private RemoteObject object;
+	private RemoteObjectSerializer serializer =	new RemoteObjectSerializer();
 
 	@SuppressWarnings("unchecked")
-	public static <T extends RemoteObject, U extends RemoteObject> T newInstance(U object, Class<T> klass) {
-		return (T) java.lang.reflect.Proxy.newProxyInstance(object.getClass().getClassLoader(), object.getClass().getInterfaces(), new RemoteProxyObject(object));
+	public static <T extends RemoteObject, I extends RemoteObject> I newInstance(T object, Class<I> klass) {
+		return (I) Proxy.newProxyInstance(object.getClass().getClassLoader(), object.getClass().getInterfaces(), new RemoteProxyObject(object));
 	}
 
 	private RemoteProxyObject(RemoteObject object) {
@@ -42,9 +50,9 @@ public class RemoteProxyObject implements InvocationHandler, Serializable {
 	}
 
 	private Object conditionallyInvokeRemote(Method m, final Object[] args) throws IllegalArgumentException, IllegalAccessException, InvocationTargetException {
-//		System.out.println("Detected a remote annotation attempting to Inoke Method: " + m.getName() + " remotely.");
+		System.out.println("Detected a remote annotation attempting to Inoke Method: " + m.getName() + " remotely.");
 		
-//		Object retval = null;
+		Object retval = null;
 //		OffloadComputeTask task = new OffloadComputeTask(object, m.getName(), args, m.getParameterTypes());
 //		try {
 //			Registry registry = LocateRegistry.getRegistry("50.56.71.70",1099);
@@ -55,7 +63,19 @@ public class RemoteProxyObject implements InvocationHandler, Serializable {
 //		} catch (NotBoundException e) {
 //			e.printStackTrace();
 //		}
-		return null;
+		
+		try {
+			ByteBuffer serialize = serializer.serialize(object);
+			SocketChannel open = SocketChannel.open(new InetSocketAddress("localHost", 5678));
+			open.write(serialize);
+			
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		retval = m.invoke(object, args);
+		
+		return retval;
 	}
 
 }

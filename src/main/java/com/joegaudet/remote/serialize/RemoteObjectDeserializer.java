@@ -80,6 +80,56 @@ public class RemoteObjectDeserializer {
 		return retval;
 	}
 
+	public RemoteObject readObjectFromByteBuffer(ByteBuffer buffer) throws IOException, ClassNotFoundException {
+		int schemaLength = buffer.getInt();
+		RemoteObject retval = null;
+		Set<RemoteObject> objects = new HashSet<RemoteObject>();
+		int schemaOffset = buffer.remaining() - schemaLength;
+
+		while (buffer.remaining() != schemaOffset) {
+			// this object
+			int size = buffer.getInt();
+			// the remaing we want to drill to for this object
+			int offset = buffer.remaining() - size + 4;
+			int thisHashCode = buffer.getInt();
+
+			try {
+				RemoteObject remoteObject = (loadClass(buffer)).getConstructor().newInstance();
+				
+				remoteObject.deserialize(buffer);
+				
+				// deserialize the fields that came along
+				while (buffer.remaining() != offset) {
+					int hashCode = buffer.getInt();
+
+					RemoteableField<?> fieldForHashCode = remoteObject.fieldForHashCode(hashCode);
+					if (fieldForHashCode != null) {
+						fieldForHashCode.deserialize(buffer);
+					}
+				}
+
+				objectMap.put(thisHashCode, remoteObject);
+				objects.add(remoteObject);
+				
+				if (retval == null) {
+					retval = remoteObject;
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		}
+		
+		for(RemoteObject object: objects){
+			for(ObjectField<?> field : object.getObjectFields()){
+				if(field.isDirty()){
+					field.setWithCast(objectMap.get(field.getTempHashCode()));
+					field.setTempHashCode(0);
+				}
+			}
+		}
+		return retval;
+	}
+	
 	@SuppressWarnings("unchecked")
 	public <T extends RemoteObject> T readObjectFromChannel(FileChannel channel, Class<T> class1) throws IOException, ClassNotFoundException {
 		return (T) readObjectFromChannel(channel);
