@@ -10,6 +10,8 @@ import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.SocketChannel;
 
+import com.joegaudet.remote.compute.RemoteMethodInvocation;
+import com.joegaudet.remote.compute.Result;
 import com.joegaudet.remote.serialize.RemoteObjectSerializer;
 
 @SuppressWarnings("serial")
@@ -53,28 +55,47 @@ public class RemoteProxyObject implements InvocationHandler, Serializable {
 		System.out.println("Detected a remote annotation attempting to Inoke Method: " + m.getName() + " remotely.");
 		
 		Object retval = null;
-//		OffloadComputeTask task = new OffloadComputeTask(object, m.getName(), args, m.getParameterTypes());
-//		try {
-//			Registry registry = LocateRegistry.getRegistry("50.56.71.70",1099);
-//			Compute comp = (Compute) registry.lookup("Compute");
-//			retval = comp.executeTask(task);
-//		} catch (RemoteException e) {
-//			e.printStackTrace();
-//		} catch (NotBoundException e) {
-//			e.printStackTrace();
-//		}
-		
+		SocketChannel channel = null;
 		try {
-			ByteBuffer serialize = serializer.serialize(object);
-			SocketChannel open = SocketChannel.open(new InetSocketAddress("localHost", 5678));
-			open.write(serialize);
+			channel = SocketChannel.open(new InetSocketAddress("localHost", 5678));
+			RemoteMethodInvocation rmi = new RemoteMethodInvocation(m, object, args);
+			ByteBuffer serialize = rmi.toBuffer();
+			serialize.rewind();
 			
+			while(serialize.hasRemaining()) channel.write(serialize);
+
+			// return
+			ByteBuffer buffer = ByteBuffer.allocate(4);
+			channel.read(buffer);
+			buffer.rewind();
+			
+			buffer = ByteBuffer.allocate(buffer.getInt());
+			while(buffer.hasRemaining()) channel.read(buffer);
+			
+			buffer.rewind();
+			
+			System.out.println("Returned: " + buffer.capacity());
+			
+			Result result = new Result(buffer);
+
+			System.out.println("result :" + result.getType());
+
+			retval = result.getResult();
 		} catch (IOException e) {
 			e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+			e.printStackTrace();
+		}
+		finally{
+			if(channel != null && channel.isOpen()){
+				try {
+					channel.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 
-		retval = m.invoke(object, args);
-		
 		return retval;
 	}
 

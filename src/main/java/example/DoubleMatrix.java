@@ -31,8 +31,7 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 
 	@Override
 	@Remote
-	public Matrix product(Matrix matrix) {
-		System.out.print("\nsp, \t");
+	public Matrix product(DoubleMatrix matrix) {
 		long time = System.currentTimeMillis();
 		int n = data.getN();
 		double[][] output = new double[n][n];
@@ -40,13 +39,22 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 			for (int j = 0; j < n; j++) {
 				double value = 0;
 				for (int k = 0; k < n; k++) {
-					value += data.get(i,k) * matrix.get(k, j);
+					value += data.get(i, k) * matrix.get(k, j);
 				}
 				output[i][j] = value;
 			}
 		}
-		System.out.print(matrix.size() + ",\t" + (System.currentTimeMillis() - time));
 		DoubleMatrix result = new DoubleMatrix(output);
+		return result;
+	}
+	
+	@Override
+	@Remote
+	public Matrix pow(int amount) {
+		Matrix result = this;
+		for(int i = 0; i < amount; i++){
+			result = result.product(this);
+		}
 		return result;
 	}
 
@@ -55,10 +63,10 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 	public Matrix parallelProduct(int threadCount, final Matrix matrix) {
 		if (threadCount > matrix.size())
 			return null;
-		System.out.print("\npp, \t");
+//		System.out.print("\npp, \t");
 		long time = System.currentTimeMillis();
 		final int n = data.getN();
-		
+
 		int strideLength = (int) Math.floor(n / threadCount);
 		int lastStride = n - threadCount * strideLength;
 		lastStride = (lastStride == 0) ? strideLength : lastStride;
@@ -83,7 +91,7 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 						for (int j = 0; j < n; j++) {
 							double value = 0;
 							for (int k = 0; k < n; k++) {
-								value += data.get(i,k) * matrix.get(k, j);
+								value += data.get(i, k) * matrix.get(k, j);
 							}
 							output[i][j] = value;
 						}
@@ -110,7 +118,7 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 		} catch (BrokenBarrierException e) {
 			e.printStackTrace();
 		}
-		System.out.print(matrix.size() + ",\t" + (System.currentTimeMillis() - time));
+//		System.out.print(matrix.size() + ",\t" + (System.currentTimeMillis() - time));
 
 		DoubleMatrix result = new DoubleMatrix(output);
 		return result;
@@ -131,10 +139,11 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 		}
 		return retval;
 	}
-	
+
 	@Override
 	public boolean equals(Object obj) {
-		if(!(obj instanceof DoubleMatrix)) return false;
+		if (!(obj instanceof DoubleMatrix))
+			return false;
 		return this.equals((DoubleMatrix) obj);
 	}
 
@@ -179,46 +188,18 @@ public class DoubleMatrix extends AbstractRemoteObject implements Matrix {
 	}
 
 	public static void main(String[] args) throws FileNotFoundException, IOException {
-		DoubleMatrix identity = DoubleMatrix.getIdentity(5);
-		Matrix newInstance = RemoteProxyObject.newInstance(DoubleMatrix.getRandom(5),Matrix.class);
-		Matrix result = newInstance.product(identity);
-		System.out.println();
-		System.out.println(result);
-		System.out.println(result.equals(newInstance));
-		
-		//		int[] sizes = { 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 };
-//		for (int i = 0; i < sizes.length; i++) {
-//			File file = new File(sizes[i] + ".obj");
-//			System.err.println("Transmitting file (" + file.getName() + "): " + file.length());
-//			long time = System.currentTimeMillis();
-//			FileChannel in = new FileInputStream(file).getChannel();
-//			SocketChannel channel = null;
-//			try {
-//				channel = SocketChannel.open(new InetSocketAddress("50.56.73.9", 1099));
-//				in.transferTo(0, file.length(), channel);
-//			} finally {
-//				if (channel != null)
-//					channel.close();
-//			}
-//			double took = (System.currentTimeMillis() - time) / 1000; // s
-//			System.out.println("Took: " + took + "s byteRate: " + (file.length() / took / (1024 * 1024)));
-//			// Matrix identity = DoubleMatrix.getIdentity(size);
-//			//			
-//			// long time = System.currentTimeMillis();
-//			// random.parallelProduct(4, identity);
-//			// System.out.print("\nrpp, \t" + size + ", \t" +
-//			// (System.currentTimeMillis() - time));
-//			//			
-//			// time = System.currentTimeMillis();
-//			// random.product(identity);
-//			// System.out.print("\nrsp, \t" + size + ", \t" +
-//			// (System.currentTimeMillis() - time));
-//			//			
-//			// time = System.currentTimeMillis();
-//			// random2.product(identity);
-//			// System.out.println("lsp, \t\t" + size + ", " +
-//			// (System.currentTimeMillis() - time));
-//		}
+
+		int[] sizes = { 10, 20, 30, 40, 50, 100, 200, 500, 1000 };
+		for (int i = 0; i < sizes.length; i++) {
+			DoubleMatrix identity = DoubleMatrix.getIdentity(sizes[i]);
+			Matrix newInstance = RemoteProxyObject.newInstance(DoubleMatrix.getRandom(sizes[i]), Matrix.class);
+			System.out.println("Trying Size: " + sizes[i]);
+
+			long time = System.currentTimeMillis();
+			newInstance.product(identity);
+			
+			System.out.println("Took: " + (System.currentTimeMillis() - time));
+		}
 	}
 
 	@Override

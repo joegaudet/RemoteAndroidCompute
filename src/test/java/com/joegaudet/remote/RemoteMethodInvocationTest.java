@@ -7,7 +7,6 @@ import java.nio.ByteBuffer;
 
 import org.junit.Test;
 
-import com.joegaudet.remote.compute.ArgumentArray;
 import com.joegaudet.remote.compute.RemoteMethodInvocation;
 
 
@@ -24,7 +23,7 @@ public class RemoteMethodInvocationTest {
 		
 		RemoteMethodInvocation rmi = new RemoteMethodInvocation(method, remoteObjectWithMethod, remoteObject2);
 		
-		Double result = (Double) rmi.invoke();
+		Double result = rmi.invoke().get(Double.class);
 		
 		assertEquals(result, new Double(remoteObject2.getDoubleField() * remoteObjectWithMethod.getDoubleField()));
 		
@@ -41,14 +40,14 @@ public class RemoteMethodInvocationTest {
 		Method method = TestRemoteObjectWithMethod.class.getMethod("doubleProduct", TestRemoteObject.class);
 		
 		RemoteMethodInvocation rmi = new RemoteMethodInvocation(method, remoteObjectWithMethod, remoteObject2);
-		ByteBuffer buffer = rmi.serialize();
-		
+		ByteBuffer buffer = rmi.toBuffer();
 		buffer.rewind();
+		buffer.getInt(); // assume size has already been read
+
 		RemoteMethodInvocation rmi2 = new RemoteMethodInvocation();
-		buffer.getInt();
 		
-		rmi2.deserialize(buffer);
-		Double result = (Double) rmi2.invoke();
+		rmi2.fromBuffer(buffer);
+		Double result = rmi2.invoke().get(Double.class);
 		
 		assertEquals(result, new Double(remoteObject2.getDoubleField() * remoteObjectWithMethod.getDoubleField()));
 		

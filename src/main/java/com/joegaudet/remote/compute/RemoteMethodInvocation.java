@@ -26,35 +26,46 @@ public class RemoteMethodInvocation {
 	public RemoteMethodInvocation() {
 	}
 
-	public ByteBuffer serialize(){
+	public ByteBuffer toBuffer(){
 		int size =  8 + args.size() + 4 + new SchemaSizeVisitor(target).computeSchemaSize();
+		
 		ByteBuffer buffer = ByteBuffer.allocate(size);
+		
 		buffer.putInt(size);
 		buffer.putInt(methodNameHashCode);
+		
 		new RemoteObjectSerializer().serialize(target, buffer);
+		
 		args.toBuffer(buffer);
 		return buffer;
 	}
 	
-	public void deserialize(ReadableByteChannel channel) throws IOException, ClassNotFoundException{
+	public void readFromChannel(ReadableByteChannel channel) throws IOException, ClassNotFoundException{
 		ByteBuffer buffer = ByteBuffer.allocate(4);
+
 		channel.read(buffer);
+		
 		buffer.rewind();
-		buffer = ByteBuffer.allocate(buffer.getInt());
-		channel.read(buffer);
+		buffer = ByteBuffer.allocate(buffer.getInt() - 4);
+		
+		System.out.println("Reading Remote Method Invocation Object from Channel");
+		
+		while(buffer.hasRemaining()) channel.read(buffer);
+		
+		
 		buffer.rewind();
-		methodNameHashCode = buffer.getInt();
-		target = new RemoteObjectDeserializer().readObjectFromByteBuffer(buffer);
-		args = new ArgumentArray(buffer);
+		fromBuffer(buffer);
+
+		System.out.println("Done");
 	}
 
-	public void deserialize(ByteBuffer buffer) throws IOException, ClassNotFoundException{
+	public void fromBuffer(ByteBuffer buffer) throws IOException, ClassNotFoundException{
 		methodNameHashCode = buffer.getInt();
 		target = new RemoteObjectDeserializer().readObjectFromByteBuffer(buffer);
 		args = new ArgumentArray(buffer);
 	}
 	
-	public Object invoke() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException{
+	public Result invoke() throws IllegalArgumentException, IllegalAccessException, InvocationTargetException, SecurityException, NoSuchMethodException{
 		String methodName = null;
 		for(Method method : target.getClass().getMethods()){
 			String name = method.getName();
@@ -69,7 +80,12 @@ public class RemoteMethodInvocation {
 		for(int i = 0; i < methodArgs.length; i++){
 			argTypes[i] = methodArgs[i].getClass();
 		}
-		return target.getClass().getMethod(methodName, argTypes).invoke(target, methodArgs);
+		
+		long time = System.currentTimeMillis();
+		Object result = target.getClass().getMethod(methodName, argTypes).invoke(target, methodArgs);
+		
+		System.out.println("Invoked Method: " + methodName + " took: " + (System.currentTimeMillis() - time));
+		return new Result(result);
 	}
 	
 }

@@ -1,15 +1,15 @@
 package com.joegaudet.remote.compute;
 
 import java.io.IOException;
-import java.net.InetAddress;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.joegaudet.remote.RemoteObject;
-import com.joegaudet.remote.serialize.RemoteObjectDeserializer;
 
 /**
  * Basic bones taken from:
@@ -46,14 +46,29 @@ public class RemoteExecutionServer implements Runnable {
 			try {
 				SocketChannel channel = serverChannel.accept();
 				if(channel != null){
-					RemoteObject readObject = new RemoteObjectDeserializer().readObjectFromChannel(channel);
-					System.out.println("Read Object: " + readObject.getClass());
-					System.out.println(readObject.toString());
+					RemoteMethodInvocation rmi = new RemoteMethodInvocation();
+					rmi.readFromChannel(channel);
+					
+					Result result = rmi.invoke();
+					ByteBuffer buffer = result.toBuffer();
+					
+					while(buffer.hasRemaining()) channel.write(buffer);
+					
 					channel.close();
 				}
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ClassNotFoundException e) {
+				e.printStackTrace();
+			} catch (IllegalArgumentException e) {
+				e.printStackTrace();
+			} catch (SecurityException e) {
+				e.printStackTrace();
+			} catch (IllegalAccessException e) {
+				e.printStackTrace();
+			} catch (InvocationTargetException e) {
+				e.printStackTrace();
+			} catch (NoSuchMethodException e) {
 				e.printStackTrace();
 			}
 			

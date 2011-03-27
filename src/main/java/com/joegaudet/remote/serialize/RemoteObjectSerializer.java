@@ -31,7 +31,6 @@ public class RemoteObjectSerializer extends OneTimeVisitor {
 		int schemaSize = new SchemaSizeVisitor(object).computeSchemaSize();
 		buffer = ByteBuffer.allocate(schemaSize + 4);
 		writeToBuffer(object, schemaSize, buffer);
-		buffer.rewind();
 		return buffer;
 	}
 
@@ -61,7 +60,9 @@ public class RemoteObjectSerializer extends OneTimeVisitor {
 	}
 
 	public void writeObjectToChannel(RemoteObject object, WritableByteChannel channel) throws IOException {
-		channel.write(serialize(object));
+		ByteBuffer buffer = serialize(object);
+		buffer.rewind();
+		channel.write(buffer);
 	}
 
 	@Override
